@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  input, textarea, select, button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .campo {
+    @apply block w-full min-h-12 rounded-lg border border-slate-300 bg-white px-3 text-base
+      outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 disabled:bg-slate-100;
+  }
+  .etichetta {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+  }
+  .pulsante-primario {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 font-semibold
+      transition select-none disabled:cursor-not-allowed disabled:opacity-50 bg-slate-900 text-white hover:bg-slate-700 active:bg-slate-800;
+  }
+  .pulsante-secondario {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 font-semibold
+      transition select-none disabled:cursor-not-allowed disabled:opacity-50 border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 active:bg-slate-100;
+  }
+  .pulsante-pericolo {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 font-semibold
+      transition select-none disabled:cursor-not-allowed disabled:opacity-50 bg-red-700 text-white hover:bg-red-600;
+  }
+  .scheda {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+}
+
+@keyframes lampeggio {
+  from { background-color: rgb(254 243 199); }
+  to { background-color: transparent; }
+}
+.appena-cambiato {
+  animation: lampeggio 2.5s ease-out;
+}
