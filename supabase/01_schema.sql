@@ -508,11 +508,14 @@ begin
     raise exception 'QUANTITA_NON_VALIDA'
       using detail = 'Ogni riga deve avere un articolo e una quantità intera maggiore di zero.';
   end if;
-  select jsonb_agg(jsonb_build_object('articolo_codice', codice, 'quantita', totale))
+  -- Le righe restano nell'ordine in cui sono state inserite.
+  select jsonb_agg(jsonb_build_object('articolo_codice', codice, 'quantita', totale) order by posizione)
   into v_righe
   from (
-    select upper(trim(e ->> 'articolo_codice')) as codice, sum((e ->> 'quantita')::integer) as totale
-    from jsonb_array_elements(p_righe) e
+    select upper(trim(e ->> 'articolo_codice')) as codice,
+           sum((e ->> 'quantita')::integer) as totale,
+           min(n) as posizione
+    from jsonb_array_elements(p_righe) with ordinality as x (e, n)
     group by 1
   ) t;
 
@@ -562,7 +565,8 @@ begin
 
   insert into public.movimento_righe (movimento_id, articolo_codice, quantita)
   select v_mov.id, e ->> 'articolo_codice', (e ->> 'quantita')::integer
-  from jsonb_array_elements(v_righe) e
+  from jsonb_array_elements(v_righe) with ordinality as x (e, n)
+  order by n
   on conflict (movimento_id, articolo_codice) do update
     set quantita = excluded.quantita
     where public.movimento_righe.quantita <> excluded.quantita;

@@ -66,6 +66,9 @@ select test.ok((select operatore_id = '00000000-0000-0000-0000-000000000001' and
 select test.ok((select quantita from public.movimento_righe
                 where movimento_id = (select id from m1) and articolo_codice = 'FED5080T') = 15,
   'stesso articolo due volte: quantità sommate');
+select test.ok((select array_agg(articolo_codice order by id) from public.movimento_righe
+                where movimento_id = (select id from m1)) = array['FED5080T', 'TELO100'],
+  'righe nell''ordine di inserimento');
 select test.ok((select azione = 'creazione' and prima is null and jsonb_array_length(dopo -> 'righe') = 2
                   and utente_id = '00000000-0000-0000-0000-000000000001'
                 from public.audit_movimenti where movimento_id = (select id from m1)),
@@ -258,4 +261,15 @@ select test.ok(test.errore($$select public.salva_movimento(null, null,
 select test.come('00000000-0000-0000-0000-00000000000a');
 select test.ok(test.errore('select public.genera_dati_demo()') like 'DATI_REALI_PRESENTI%',
   'demo bloccata se ci sono movimenti reali');
+reset role;
+
+-- Ordine delle righe: quello di inserimento, non alfabetico.
+set role authenticated;
+select test.come('00000000-0000-0000-0000-00000000000a');
+select public.salva_movimento(null, null,
+  '{"direzione":"ENTRATA","causale":"RITIRO_INVENTARIO","cliente_codice":2001}',
+  '[{"articolo_codice":"TELO100","quantita":1},{"articolo_codice":"FED5080","quantita":2},{"articolo_codice":"TELO100","quantita":3}]');
+select test.ok((select array_agg(articolo_codice || '×' || quantita order by id) from public.movimento_righe
+                where movimento_id = (select max(id) from public.movimenti)) = array['TELO100×4', 'FED5080×2'],
+  'righe nell''ordine di inserimento (non alfabetico)');
 reset role;

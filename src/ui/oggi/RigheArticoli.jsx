@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { aggiungiRiga, leggiQuantita, pezzi } from '../../data/movimento.js';
 import { cercaArticoli } from '../../data/ricerca.js';
 import { ETICHETTE_CATEGORIA } from '../../data/tipi.js';
@@ -19,6 +19,11 @@ export default function RigheArticoli({ righe, onCambia, errore, articoloRef }) 
   const quantitaRef = useRef(null);
 
   const risultati = useMemo(() => cercaArticoli(articoli, testo), [articoli, testo]);
+
+  // Form svuotato (movimento salvato o annullato): via i messaggi rimasti.
+  useEffect(() => {
+    if (righe.length === 0) setMessaggio('');
+  }, [righe.length]);
 
   function seleziona(articolo) {
     setScelto(articolo);

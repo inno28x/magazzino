@@ -117,13 +117,20 @@ export async function movimentiDelGiorno(data) {
       .select(CAMPI_MOVIMENTO)
       .eq('data', data)
       .order('created_at', { ascending: false })
+      .order('id', { referencedTable: 'righe' })
       .range(0, 9999),
   );
 }
 
 /** @returns {Promise<Movimento | null>} null se non esiste o non è visibile */
 export async function caricaMovimento(id) {
-  return esegui(supabase.from('movimenti').select(CAMPI_MOVIMENTO).eq('id', id).maybeSingle());
+  return esegui(
+    supabase.from('movimenti')
+      .select(CAMPI_MOVIMENTO)
+      .eq('id', id)
+      .order('id', { referencedTable: 'righe' })
+      .maybeSingle(),
+  );
 }
 
 /**
